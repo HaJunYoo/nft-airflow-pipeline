@@ -27,16 +27,15 @@ def _processing_nft(ti):
   })
   processed_nft.to_csv('/tmp/processed_nft.csv', index=None, header=False)
 
-
-
-# DAG Skeleton 
+# DAG Skeleton
 with DAG(dag_id='nft-pipeline',
-         schedule_interval='@daily', # 주기 지정
-         default_args=default_args, 
+         # schedule_interval='@daily', # 주기 지정
+         schedule_interval='* */1 * * *', # 주기 지정
+         default_args=default_args,
          tags=['nft'],
-         catchup=False) as dag:
-  pass
-  
+         catchup=False
+         ) as dag:
+
   creating_table = SqliteOperator(
     task_id='creating_table',
     sqlite_conn_id='db_sqlite',
@@ -61,7 +60,7 @@ with DAG(dag_id='nft-pipeline',
     http_conn_id='opensea_api',
     endpoint='api/v1/assets?collection=doodles-official&limit=1',
     method='GET',
-    response_filter=lambda res: json.loads(res.text),
+    response_filter=lambda res: json.loads(res.text), # json 형태로 변환
     log_response=True
   )
 
@@ -71,4 +70,16 @@ with DAG(dag_id='nft-pipeline',
     python_callable=_processing_nft
   )
 
-  creating_table >> is_api_available >> extract_nft >> process_nft
+  storing_user = BashOperator(
+    task_id='storing_user',
+    bash_command='''\
+      if [ "$(sqlite3 /Users/yoohajun/Airflow/nft.db "SELECT COUNT(*) FROM nfts WHERE token_id='{{ ti.xcom_pull(task_ids='process_nft')['token_id'] }}'")" -eq 0 ]; then \
+        echo -e ".separator ','\n.import /tmp/processed_nft.csv nfts" | sqlite3 /Users/yoohajun/Airflow/nft.db; \
+      else \
+        echo "Token ID {{ ti.xcom_pull(task_ids='process_nft')['token_id'] }} already exists in nfts table"; \
+      fi
+    '''
+  )
+
+  ## DAG dependency insertion
+  creating_table >> is_api_available >> extract_nft >> process_nft >> storing_user
