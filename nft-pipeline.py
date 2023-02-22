@@ -13,6 +13,22 @@ default_args = {
   'start_date': datetime(2023, 1, 1),
 }
 
+
+def _processing_nft(ti):
+  assets = ti.xcom_pull(task_ids=['extract_nft'])
+  if not len(assets):
+    raise ValueError("assets is empty")
+  nft = assets[0]['assets'][0] # nft asset
+
+  processed_nft = json_normalize({
+    'token_id': nft['token_id'],
+    'name': nft['name'],
+    'image_url': nft['image_url'],
+  })
+  processed_nft.to_csv('/tmp/processed_nft.csv', index=None, header=False)
+
+
+
 # DAG Skeleton 
 with DAG(dag_id='nft-pipeline',
          schedule_interval='@daily', # 주기 지정
@@ -49,4 +65,10 @@ with DAG(dag_id='nft-pipeline',
     log_response=True
   )
 
-  creating_table >> is_api_available >> extract_nft
+  ## call python processing function
+  process_nft = PythonOperator(
+    task_id='process_nft',
+    python_callable=_processing_nft
+  )
+
+  creating_table >> is_api_available >> extract_nft >> process_nft
