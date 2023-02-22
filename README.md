@@ -1,12 +1,10 @@
 <aside>
-💡 [https://api.opensea.io/api](https://api.opensea.io/api) 의 api를 이용해서 데이터 파이프라인에 ETL 저장을 해보는 프로젝트
+💡 (https://api.opensea.io/api) 의 api를 이용해서 데이터 파이프라인에 ETL 저장을 해보는 프로젝트
 
 </aside>
 
 1. 테이블 생성
-    
-    ![스크린샷 2023-02-22 오전 12.06.29.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/17ac1ad2-d64f-4ffa-bfb5-0440e8dc210d/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-02-22_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_12.06.29.png)
-    
+     
     ```python
     from datetime import datetime
     import json
@@ -47,9 +45,7 @@
         ⇒ INFO - Marking task as SUCCESS. dag_id=nft-pipeline, task_id=creating_table, execution_date=20230220T000000, start_date=, end_date=20230221T151044 
         
 2. API 확인
-    
-    ![스크린샷 2023-02-22 오전 12.55.10.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/4b9806a6-36b4-4c5b-8651-2698b1c39f4d/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-02-22_%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB_12.55.10.png)
-    
+     
     ```python
     from airflow.providers.http.sensors.http import HttpSensor
     
@@ -64,9 +60,7 @@
     
     [https://api.opensea.io/api/v1/assets?collection=doodles-official&limit=1](https://api.opensea.io/api/v1/assets?collection=doodles-official&limit=1)
     위의 SimpleHttpOperator****************를 통해**************** api 내용을 가져올 것이다.
-    
-    ![스크린샷 2023-02-22 오후 3.50.17.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/c8003708-1f7d-4013-9795-680433283fed/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-02-22_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_3.50.17.png)
-    
+     
     ```python
     extract_nft = SimpleHttpOperator(
         task_id='extract_nft',
@@ -153,9 +147,7 @@
              tags=['nft'],
              catchup=False) as dag:
     ```
-    
-    ![스크린샷 2023-02-22 오후 5.20.31.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ca9f43df-1f34-44e8-9d03-bf8e70bef182/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA_2023-02-22_%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE_5.20.31.png)
-    
+     
 
 1. storing task revision
     
